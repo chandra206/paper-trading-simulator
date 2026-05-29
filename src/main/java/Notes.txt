@@ -1,0 +1,215 @@
+import net.jacobpeterson.alpaca.AlpacaAPI;
+import net.jacobpeterson.alpaca.model.util.apitype.MarketDataWebsocketSourceType;
+import net.jacobpeterson.alpaca.model.util.apitype.TraderAPIEndpointType;
+import net.jacobpeterson.alpaca.model.websocket.marketdata.MarketDataMessage;
+import net.jacobpeterson.alpaca.model.websocket.marketdata.streams.stock.model.trade.StockTradeMessage;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataWebsocketInterface;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataListenerAdapter;
+import java.util.Collections;
+
+public class StockStreamer{
+    public static void main(String[] args) {
+        
+        AlpacaAPI alpacaAPI = new AlpacaAPI("YOUR_KEY", "YOUR_SECRET", TraderAPIEndpointType.PAPER, MarketDataWebsocketSourceType.IEX);
+
+        StockMarketDataWebsocketInterface stockStream = alpacaAPI.stockMarketDataStream();
+
+        stockStream.setListener(new StockMarketDataListenerAdapter(){
+            @Override
+            public void onStreamMessage(MarketDataMessage message){
+                if (message instanceof StockTradeMessage){
+                    StockTradeMessage trade = (StockTradeMessage) message;
+                    System.out.println("TRADE: " + trade.getSymbol() + " @ $" + trade.getPrice());
+                }
+            }
+        });
+
+        try {
+            stockStream.connect();
+            stockStream.setTradeSubscriptions(Collections.singleton("AAPL"));
+            System.out.println("Listening for AAPL trades...");
+
+            Thread.sleep(60000);
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            stockStream.disconnect();
+        }
+    }
+}
+
+
+
+
+-------------------------------------------------------------------------------------------------------------
+
+import net.jacobpeterson.alpaca.AlpacaAPI;
+import net.jacobpeterson.alpaca.model.util.apitype.MarketDataWebsocketSourceType;
+import net.jacobpeterson.alpaca.model.util.apitype.TraderAPIEndpointType;
+import net.jacobpeterson.alpaca.model.websocket.marketdata.MarketDataMessage;
+import net.jacobpeterson.alpaca.model.websocket.marketdata.streams.stock.model.trade.StockTradeMessage;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataWebsocketInterface;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataListenerAdapter;
+import java.util.Collections;
+
+public class StockStreamer{
+    public static void main(String[] args) {
+        
+        AlpacaAPI alpacaAPI = new AlpacaAPI("YOUR_KEY", "YOUR_SECRET", TraderAPIEndpointType.PAPER, MarketDataWebsocketSourceType.IEX);
+
+        StockMarketDataWebsocketInterface stockStream = alpacaAPI.stockMarketDataStream();
+
+        stockStream.setListener(new StockMarketDataListenerAdapter(){
+            @Override
+            public void onStreamMessage(MarketDataMessage message){
+                if (message instanceof StockTradeMessage){
+                    StockTradeMessage trade = (StockTradeMessage) message;
+                    System.out.println("TRADE: " + trade.getSymbol() + " @ $" + trade.getPrice());
+                }
+            }
+        });
+
+        try {
+            stockStream.connect();
+            stockStream.setTradeSubscriptions(Collections.singleton("AAPL"));
+            System.out.println("Listening for AAPL trades...");
+
+            Thread.sleep(60000);
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            stockStream.disconnect();
+        }
+    }
+}
+
+-------------------------------------------------------------------------
+
+
+import net.jacobpeterson.alpaca.model.websocket.marketdata.model.MarketDataMessage;
+
+------------------------------------------------------------------------
+
+
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+-----------------------------------------------------------------------------
+
+
+BEST ONE YETTTTTTTTTTTTTTTTTTTTTTTT
+
+AlpacaAPI alpacaAPI = new AlpacaAPI(
+            "YOUR_KEY", 
+            "YOUR_SECRET", 
+            TraderAPIEndpointType.PAPER, 
+            MarketDataWebsocketSourceType.IEX
+        );
+
+        StockMarketDataWebsocketInterface stockStream = alpacaAPI.stockMarketDataStream();
+
+        // Use the Adapter and override only onTrade
+        stockStream.setListener(new StockMarketDataListenerAdapter() {
+            
+
+            @Override
+            public void onConnected() {
+                System.out.println("WebSocket connected — subscribing...");
+                stockStream.setTradeSubscriptions(Collections.singleton("AAPL"));
+            }
+
+            //___________________________________________________________________________________________________________________________________
+
+            @Override
+            public void onTrade(StockTradeMessage trade) {
+                System.out.println("TRADE: " + trade.getSymbol() + " @ $" + trade.getPrice());
+            }
+        });
+
+        try {
+
+            stockStream.setTradeSubscriptions(Collections.singleton("AAPL")); 
+            stockStream.connect();
+            System.out.println("Listening for AAPL trades...");
+            Thread.sleep(60_000); // Keep alive for 1 minute
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            stockStream.disconnect();
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import net.jacobpeterson.alpaca.AlpacaAPI;
+import net.jacobpeterson.alpaca.model.util.apitype.MarketDataWebsocketSourceType;
+import net.jacobpeterson.alpaca.model.util.apitype.TraderAPIEndpointType;
+import net.jacobpeterson.alpaca.model.websocket.marketdata.streams.stock.model.trade.StockTradeMessage;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataWebsocketInterface;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataListenerAdapter; // Added this import
+import java.util.Collections;
+
+public class StockStreamer {
+    public static void main(String[] args) {
+        
+        // Ensure you use your PAPER keys and the IEX feed for free accounts
+        AlpacaAPI alpacaAPI = new AlpacaAPI(
+        "YOUR_PAPER_KEY",
+        "YOUR_PAPER_SECRET",
+        TraderAPIEndpointType.PAPER,
+        MarketDataWebsocketSourceType.IEX
+        );
+
+        StockMarketDataWebsocketInterface stockStream = alpacaAPI.stockMarketDataStream();
+
+        stockStream.setListener(new StockMarketDataListenerAdapter() {
+
+        @Override
+        public void onOpen() {
+            System.out.println("WebSocket opened — subscribing...");
+            stockStream.setTradeSubscriptions(Collections.singleton("AAPL"));
+        }
+
+        @Override
+        public void onTrade(StockTradeMessage trade) {
+            System.out.println("TRADE: " + trade.getSymbol() + " @ $" + trade.getPrice());
+        }
+
+        @Override
+        public void onError(Throwable throwable) {
+            throwable.printStackTrace();
+        }
+        });
+
+         try {
+
+            stockStream.setTradeSubscriptions(Collections.singleton("AAPL")); 
+            stockStream.connect();
+            System.out.println("Listening for AAPL trades...");
+            Thread.sleep(60_000); // Keep alive for 1 minute
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            stockStream.disconnect();
+        }
+
+    }
+}

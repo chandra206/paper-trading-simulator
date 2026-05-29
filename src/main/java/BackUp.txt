@@ -1,0 +1,111 @@
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
+import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
+
+import net.jacobpeterson.alpaca.AlpacaAPI;
+import net.jacobpeterson.alpaca.model.util.apitype.MarketDataWebsocketSourceType;
+import net.jacobpeterson.alpaca.model.util.apitype.TraderAPIEndpointType;
+import net.jacobpeterson.alpaca.model.websocket.marketdata.streams.stock.model.trade.StockTradeMessage;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataWebsocketInterface;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataListenerAdapter; // Added this import
+import java.util.Collections;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+public class StockStreamer {
+    public static void main(String[] args) {
+        
+        // Ensure you use your PAPER keys and the IEX feed for free accounts
+        AlpacaAPI alpacaAPI = new AlpacaAPI(
+            "YOUR_KEY", 
+            "YOUR_SECRET", 
+            TraderAPIEndpointType.PAPER, 
+            MarketDataWebsocketSourceType.IEX
+        );
+
+        StockMarketDataWebsocketInterface stockStream = alpacaAPI.stockMarketDataStream();
+
+        // Use the Adapter and override only onTrade
+        stockStream.setListener(new StockMarketDataListenerAdapter() {
+            
+
+            //______________________________________________________________________________________________________________________________________________________
+
+            @Override
+            public void onTrade(StockTradeMessage trade) {
+                System.out.println("TRADE: " + trade.getSymbol() + " @ $" + trade.getPrice());
+            }
+        });
+
+        //______________________________________________________________________________________________________________________________________________
+
+        Region region = Region.US_EAST_2; 
+        SecretsManagerClient client = SecretsManagerClient.builder().region(region).build();
+        String secretName = "AlpacaKeyz";
+
+        try {
+
+            // 1. Get the response from the client
+            GetSecretValueRequest valueRequest = GetSecretValueRequest.builder().secretId(secretName).build();
+            GetSecretValueResponse valueResponse = client.getSecretValue(valueRequest);
+            String secretString = valueResponse.secretString();
+
+
+            // 2. PASTE THIS SYNTAX HERE TO PARSE THE KEYS
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode keysJson = mapper.readTree(secretString);
+
+            // Extract the strings using the labels you set in the AWS Console
+            String realKey = keysJson.get("ALPACAKEY").asText();
+            String realSecret = keysJson.get("ALPACASECRET").asText();
+
+            // 3. Pass the REAL strings into the Alpaca constructor
+            
+            
+
+            stockStream.connect();
+            System.out.println("Connection Successful to Alpaca Websocket");
+            Thread.sleep(1000);
+            stockStream.setTradeSubscriptions(Collections.singleton("AAPL")); 
+            System.out.println("Listening for AAPL trades...");
+            Thread.sleep(60_000); // Keep alive for 1 minute
+
+        } catch (Exception e) {
+
+            System.out.println("Error " + e.getMessage());
+            e.printStackTrace();
+
+        } finally {
+
+            System.out.println("Disconnecting...");
+            stockStream.disconnect();
+        
+        }
+
+
+    }
+}
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
+            // Get the raw package from AWS
+            GetSecretValueRequest valueRequest = GetSecretValueRequest.builder().secretId(secretName).build();
+            GetSecretValueResponse valueResponse = client.getSecretValue(valueRequest);
+            String secretString = valueResponse.secretString();
+
+            // --- STEP 2: PARSE THE JSON PACKAGE ---
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode keysJson = mapper.readTree(secretString);
+
+            // Extract labels (Check your AWS Console to ensure these names match exactly!)
+            String realKey = keysJson.get("ALPACAKEY").asText();
+            String realSecret = keysJson.get("ALPACASECRET").asText();

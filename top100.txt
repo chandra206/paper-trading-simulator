@@ -1,0 +1,100 @@
+Nvidia,NVDA
+Alphabet,GOOGL
+Apple,AAPL
+Microsoft,MSFT
+Amazon,AMZN
+Meta Platforms,META
+Broadcom,AVGO
+Tesla,TSLA
+Berkshire Hathaway,BRK.B
+JPMorgan Chase,JPM
+Visa,V
+Eli Lilly,LLY
+Walmart,WMT
+Mastercard,MA
+Exxon Mobil,XOM
+Johnson & Johnson,JNJ
+Procter & Gamble,PG
+Costco,COST
+Home Depot,HD
+AbbVie,ABBV
+Bank of America,BAC
+UnitedHealth,UNH
+Coca-Cola,KO
+Salesforce,CRM
+Oracle,ORCL
+Chevron,CVX
+Linde,LIN
+ServiceNow,NOW
+Disney,DIS
+Accenture,ACN
+Adobe,ADBE
+Advanced Micro Devices,AMD
+Abbott Laboratories,ABT
+McDonald's,MCD
+Merck,MRK
+Uber,UBER
+Intuitive Surgical,ISRG
+Netflix,NFLX
+Pepsico,PEP
+Goldman Sachs,GS
+Texas Instruments,TXN
+Booking Holdings,BKNG
+Intuit,INTU
+Verizon,VZ
+Qualcomm,QCOM
+Caterpillar,CAT
+American Express,AXP
+Morgan Stanley,MS
+S&P Global,SPGI
+Boston Scientific,BSX
+Boeing,BA
+Palo Alto Networks,PANW
+IBM,IBM
+Honeywell,HON
+Union Pacific,UNP
+Applied Materials,AMAT
+GE Aerospace,GE
+BlackRock,BLK
+Gilead,GILD
+NextEra Energy,NEE
+Danaher,DHR
+Intuitive Surgical,ISRG
+Amgen,AMGN
+TJX Companies,TJX
+Lowe's,LOW
+Stryker,SYK
+Automatic Data Processing,ADP
+Deere & Company,DE
+Progressive,PGR
+Citigroup,C
+Eaton,ETN
+Vertex Pharmaceuticals,VRTX
+Marsh & McLennan,MMC
+Lam Research,LRCX
+Prologis,PLD
+Chubb,CB
+CME Group,CME
+Analog Devices,ADI
+Intercontinental Exchange,ICE
+Altria Group,MO
+Wells Fargo,WFC
+Blackstone,BX
+Pepsico,PEP
+Lockheed Martin,LMT
+Southern Company,SO
+Arista Networks,ANET
+Bristol-Myers Squibb,BMY
+Starbucks,SBUX
+Elevance Health,ELV
+Fiserv,FI
+Duke Energy,DUK
+Welltower,WELL
+McKesson,MCK
+Constellation Energy,CEG
+Intel,INTC
+Cadence Design Systems,CDNS
+The Cigna Group,CI
+Waste Management,WM
+Parker-Hannifin,PH
+Mondelez,MDLZ
