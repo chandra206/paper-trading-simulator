@@ -17,6 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import Market.PaperWallet;
 import Market.WALManager;
 
+
+//We will need to make changes to this file to implimemet our Lambda function.
+
 public class StockStreamer {
     
     public static void main(String[] args) {
