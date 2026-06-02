@@ -11,6 +11,7 @@ import Market.PaperWallet;
 import java.util.concurrent.ConcurrentHashMap;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+//We will need to make changes to this file to implimemet our Lambda function.
 
 public class S3Manager {
 

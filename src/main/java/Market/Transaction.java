@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+//We will need to make changes to this file to implimemet our Lambda function.
 
 public class Transaction implements Comparable<Transaction> {
 
