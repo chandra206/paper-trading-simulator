@@ -1,7 +1,10 @@
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 
 import Market.PaperWallet;
@@ -13,6 +16,7 @@ public class S3Manager {
 
     //Bucket Name
     private static final String S3BucketName = "stock-market-user-data--chandrathatikonda";
+    private static final String S3BucketKey = "Alpca-top100-prices--per-minute/live_prices.json";
     
     //Region the Bucket is in
     private static final Region S3BucketRegion = Region.US_EAST_2;
@@ -61,6 +65,7 @@ public class S3Manager {
 
         }
     }
+
     //________________________________________________________________________________________________________________________________________________________________________________________________________________
 
     //Upload account summary
@@ -87,5 +92,39 @@ public class S3Manager {
         }
 
         
+    }
+
+    //________________________________________________________________________________________________________________________________________________________________________________________________________________
+
+    /*
+    This method extracts the stock data. Later in the StockStreamer.java file
+    we will create a 60sec loop that calls this method every 60 seconds to get 
+    the most up to date stock prices. We will take the extracted data, every 60sec, 
+    and dump it into the priceCache. [This is really good bc it does not create 
+    conflict when the user BUY/SELL stock and the stock price is being updated 
+    at the same time.]*/
+    public static ConcurrentHashMap<String, Double> extractStockData(){
+        try {
+
+        /*This part is writing a letter saying I want to access the file in this bucket in with this key. 
+        The .build is building the request.*/
+        GetObjectRequest request = GetObjectRequest.builder().bucket(S3BucketName)
+        .key(S3BucketKey).build();
+
+        // Download directly to RAM as a byte array
+        ResponseBytes<GetObjectResponse> infoAsBytes = s3Client.getObjectAsBytes(request);
+        
+        // Parse the JSON bytes instantly into a ConcurrentHashMap
+        ObjectMapper mapper = new ObjectMapper();
+
+        // Convert the byte array directly into a ConcurrentHashMap<String, Double>
+        return mapper.readValue(infoAsBytes.asByteArray(), 
+        mapper.getTypeFactory().constructMapType(ConcurrentHashMap.class, String.class, Double.class));
+        
+        } catch (Exception e) {
+
+            System.err.println("Failed to fetch live prices from S3: " + e.getMessage());
+            return new ConcurrentHashMap<>(); //Return an empty map if there was an error
+        }
     }
 }
