@@ -7,6 +7,8 @@ import net.jacobpeterson.alpaca.AlpacaAPI;
 import net.jacobpeterson.alpaca.model.util.apitype.MarketDataWebsocketSourceType;
 import net.jacobpeterson.alpaca.model.util.apitype.TraderAPIEndpointType;
 import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataWebsocketInterface;
+import net.jacobpeterson.alpaca.model.websocket.marketdata.streams.stock.model.trade.StockTradeMessage;
+import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataListenerAdapter;
 
 
 /*
@@ -29,13 +31,28 @@ public class CommandListener implements Runnable {
     public CommandListener(PaperWallet wallet, ConcurrentHashMap<String, Double> cache) {
 
         this.myPaperWallet = wallet;
-        this.priceCache = (ConcurrentHashMap<String, Double>) cache;
-       
+        this.priceCache = (cache != null) ? cache : new ConcurrentHashMap<>();
+
         String keyID = SecretRetriever.getAlpacaKey(); 
         String secretKey = SecretRetriever.getAlpacaSecret();
 
         AlpacaAPI alpacaAPI = new AlpacaAPI(keyID, secretKey, TraderAPIEndpointType.PAPER,MarketDataWebsocketSourceType.IEX);
         this.alpacaWebSocket = alpacaAPI.stockMarketDataStream();
+
+        //LISTENER BLOCK
+        this.alpacaWebSocket.setListener(new StockMarketDataListenerAdapter(){
+
+                @Override
+                public void onTrade(StockTradeMessage trade) {
+
+                    // 1. Instantly hot-swap the live price into your global cache
+                    priceCache.put(trade.getSymbol(), trade.getPrice());
+                    
+                    // 2. Print the visual ticker tape to the user's terminal
+                    System.out.println(">>> LIVE TICK [" + trade.getSymbol() + "]: $" + trade.getPrice());
+                }
+        });
+
         this.alpacaWebSocket.connect();
 
     }
