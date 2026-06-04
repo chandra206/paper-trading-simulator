@@ -16,8 +16,9 @@ updates the HashMap with updated prices for BUY and SELL commands, it also check
 the time of market closure to ensure user data is saved and uploaded to S3 every day at 4:00 PM EST.
 */
 
-public class StockStreamer{
-    
+
+public class MarketOrchestrator{
+
     public static void main(String[] args) {
 
         // ________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________

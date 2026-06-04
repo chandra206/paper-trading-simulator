@@ -1,9 +1,12 @@
+import java.util.Collections;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 
 import Market.PaperWallet;
+import net.jacobpeterson.alpaca.AlpacaAPI;
+import net.jacobpeterson.alpaca.model.util.apitype.MarketDataWebsocketSourceType;
+import net.jacobpeterson.alpaca.model.util.apitype.TraderAPIEndpointType;
 import net.jacobpeterson.alpaca.websocket.marketdata.streams.stock.StockMarketDataWebsocketInterface;
-import java.util.Collections;
 
 
 /*
@@ -19,8 +22,7 @@ public class CommandListener implements Runnable {
 
     private PaperWallet myPaperWallet;
     private ConcurrentHashMap<String, Double> priceCache;
-    private StockMarketDataWebsocketInterface stockStreamer;
-    
+    private StockMarketDataWebsocketInterface alpacaWebSocket;
 
     // ________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
 
@@ -28,11 +30,14 @@ public class CommandListener implements Runnable {
 
         this.myPaperWallet = wallet;
         this.priceCache = (ConcurrentHashMap<String, Double>) cache;
+       
+        String keyID = SecretRetriever.getAlpacaKey(); 
+        String secretKey = SecretRetriever.getAlpacaSecret();
 
-    }
+        AlpacaAPI alpacaAPI = new AlpacaAPI(keyID, secretKey, TraderAPIEndpointType.PAPER,MarketDataWebsocketSourceType.IEX);
+        this.alpacaWebSocket = alpacaAPI.stockMarketDataStream();
+        this.alpacaWebSocket.connect();
 
-    public void setStockStream(StockMarketDataWebsocketInterface stockStream) {
-       this.stockStreamer = stockStream; 
     }
 
     // ________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________________
@@ -94,36 +99,7 @@ public class CommandListener implements Runnable {
                         System.out.println(">>> SUCCESS: Bought " + qty + " shares of " + ticker + " @ $" + livePrice);
                     }
                 } else {
-                    handleTrack(new String[] { "TRACK", ticker });
-                    System.out.println(">>> Waiting for price data...");
-
-                    //Waiting for the ticker's price to be added to the priceCache
-                    int refreshesToCheckStream = 0;
-                    while (refreshesToCheckStream < 10) { //Refresh 10 times.
-                        
-                        //Check if we have a valid price in the 'priceCache'
-                        if (priceCache.containsKey(ticker) && priceCache.get(ticker) > 0.0) {
-                            break; // Found a valid price! Exit loop.
-                        }
-                        try {
-                            Thread.sleep(500); // When we do Thread.Sleep we need to do it in a try/catch with an InterruptedException.
-                        } catch (InterruptedException e) {
-                            System.out.println("!Error: Wait interrupted.");
-                            Thread.currentThread().interrupt();
-                            break;
-                        }
-                        refreshesToCheckStream++;
-                        System.out.println("Waiting...");
-                    }
-                    System.out.println();
-
-                    //BUY after adding to the priceCache
-                    double livePrice = priceCache.get(ticker);
-                    boolean success = myPaperWallet.buyStock(ticker, qty, livePrice);
-                    if (success) {
-                        System.out.println(">>> SUCCESS: Bought " + qty + " shares of " + ticker + " @ $" + livePrice);
-                    }
-                    
+                    System.out.println("!ERROR: Price data for " + ticker + " is currently unavailable from S3.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("!Error: Quantity must be an integer.");
@@ -146,10 +122,10 @@ public class CommandListener implements Runnable {
                     double livePrice = priceCache.get(ticker);
                     boolean success = myPaperWallet.sellStock(ticker, qtyToSell, livePrice);
                     if (success) {
-                        System.out.println(">>>MANUEL SELL SUCCESS: Sold " + qtyToSell + " shares of " + ticker + " @ $" + livePrice);
+                        System.out.println(">>>MANUAL SELL SUCCESS: Sold " + qtyToSell + " shares of " + ticker + " @ $" + livePrice);
                     }
                 } else{
-                    System.out.println("You do not own the ");
+                    System.out.println("You do not own the stock or price data for " + ticker + " is currently unavailable.");
                 }
                 
             } catch (NumberFormatException e) {
@@ -168,12 +144,14 @@ public class CommandListener implements Runnable {
 
         if (parts.length == 2) {
             if (priceCache.containsKey(ticker)) { //Already tracking
-                System.out.println("!Already tracking " + ticker + ":");
-                stockStreamer.setTradeSubscriptions(Collections.singleton(ticker));
+                System.out.println(">>> Initiating stream now of "+ ticker + "...");
+                try {
+                alpacaWebSocket.setTradeSubscriptions(Collections.singleton(ticker));
+            } catch (Exception e) {
+                System.out.println("!ERROR: Failed to connect to Alpaca stream.");
+            }
             } else { //Not tracking
-                System.out.println(">>> Initiating stream now...");
-                priceCache.put(ticker, 0.0); //All we did was put the ticker in the priceCache
-                stockStreamer.setTradeSubscriptions(Collections.singleton(ticker)); //Started streaming the prices of the ticker. 
+                System.out.println("Usage: TRACK [TICKER] (Example: TRACK MSFT)"); 
             }
 
         } else {
